@@ -26,6 +26,13 @@ public class Sampler : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        PreProcessing();
+
+        DrawRandomPoints();
+    }
+
+    private void PreProcessing()
+    {
         mf = this.GetComponent<MeshFilter>();
 
         triangle_totalCount = mf.mesh.triangles.Length / 3;
@@ -54,12 +61,7 @@ public class Sampler : MonoBehaviour
 
             Vector2 centerPos = GetBarycentric(uv1, uv2, uv3);
 
-            float density = 1;
-            if (densityTex != null)
-            {
-                Color c = densityTex.GetPixel((int)(centerPos.x * densityTex.width), (int)(centerPos.y * densityTex.height));
-                density = c.r;
-            }
+            float density = GetDensityFromTex(uv1, uv2, uv3);
 
             float pdf = (density * size) / total_triangle_size;
             td.index = i;
@@ -74,8 +76,6 @@ public class Sampler : MonoBehaviour
 
             triangleDatas[i] = td;
         }
-
-        DrawRandomPoints();
 
         #region mesh subdivide
         //texelSize = densityTex.texelSize.x * densityTex.texelSize.y;
@@ -231,19 +231,26 @@ public class Sampler : MonoBehaviour
             var uv2 = mf.mesh.uv[t2];
             var uv3 = mf.mesh.uv[t3];
 
-            Vector2 barycentricPos = GetBarycentric(uv1, uv2, uv3);
-
-            float density = 1;
-            if (densityTex != null)
-            {
-                Color c = densityTex.GetPixel((int)(barycentricPos.x * densityTex.width), (int)(barycentricPos.y * densityTex.height));
-                density = c.r;
-            }
+            float density = GetDensityFromTex(uv1, uv2, uv3);
 
             total_size += (density * size);
         }
 
         return total_size;
+    }
+
+    private float GetDensityFromTex(Vector2 uv1, Vector2 uv2, Vector2 uv3)
+    {
+        Vector2 barycentricPos = GetBarycentric(uv1, uv2, uv3);
+
+        float density = 1;
+        if (densityTex != null)
+        {
+            Color c = densityTex.GetPixel((int)(barycentricPos.x * densityTex.width), (int)(barycentricPos.y * densityTex.height));
+            density = c.r;
+        }
+
+        return density;
     }
 
     private float GetTriangleSize(Vector3 v1, Vector3 v2, Vector3 v3)
