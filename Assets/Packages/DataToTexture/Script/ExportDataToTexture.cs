@@ -23,6 +23,20 @@ public class ExportDataToTexture : MonoBehaviour
 
     void Update() { }
 
+    [SerializeField]
+    bool isShowTexture = true;
+
+    public Rect rec = new Rect(0, 0, 100, 100);
+    Texture2D tex;
+    private void OnGUI()
+    {
+        if (tex == null)
+            return;
+
+        if (isShowTexture == true &&  Event.current.type.Equals(EventType.Repaint))
+            Graphics.DrawTexture(rec, tex);
+    }
+
     public void SetTargetData(Vector3[] positionData)
     {
         _positionData = positionData;
@@ -46,7 +60,10 @@ public class ExportDataToTexture : MonoBehaviour
         }
 
         int texWidth = Mathf.NextPowerOfTwo(_positionData.Length);
-        int texHeight = 2;
+        int texHeight = 1;
+
+        Debug.Log("positionData.Length : " + _positionData.Length);
+        Debug.Log("texWidth : " + texWidth);
 
         RenderTexture rt = new RenderTexture(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
         rt.name = textureName;
@@ -67,7 +84,7 @@ public class ExportDataToTexture : MonoBehaviour
 
         texGen.Dispatch(0, _positionData.Length / 8 + 1, 1, 1);
 
-        var tex = RenderTextureToTexture2D.Convert(rt);
+        tex = RenderTextureToTexture2D.Convert(rt);
 
         var pixels = tex.GetPixels();
         //for (int i = 0; i < pixels.Length; i++)

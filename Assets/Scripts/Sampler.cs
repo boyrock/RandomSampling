@@ -145,7 +145,6 @@ public class Sampler : MonoBehaviour
     {
         triangleDatas = new TriangleData[triangle_totalCount];
 
-        Debug.Log("triangle_totalCount : " + triangle_totalCount);
         for (int i = 0; i < triangle_totalCount; i++)
         {
             var t0 = mesh.triangles[i * 3];

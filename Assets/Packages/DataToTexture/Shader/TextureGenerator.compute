@@ -10,7 +10,6 @@ StructuredBuffer<float3> positionBuf;
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float3 pos = positionBuf[id.x];
-
 	output[id.xy] = pos;
 
 }

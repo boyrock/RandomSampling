@@ -71,11 +71,9 @@ public class DrawOnMesh : MonoBehaviour
                     var color = colorTex.GetPixel((int)(uv.x * colorTex.width), (int)(uv.y * colorTex.height));
                     colorDataList[i] = new Vector3(color.r, color.g, color.b);
                 }
-
-                Debug.Log("positionDataList : " + positionDataList[i]);
             }
 
-            //dataExporter.SetTargetData(positionDataList);
+            dataExporter.SetTargetData(positionDataList);
         }
         else
         {
@@ -150,21 +148,12 @@ public class DrawOnMesh : MonoBehaviour
         return p;
     }
 
-    [SerializeField]
-    [Range(0,1f)]
-    float amountRate;
-
     private void OnDrawGizmos()
     {
         if (worldPositions != null)
         {
             for (int i = 0; i < worldPositions.Length; i++)
             {
-                System.Random r = new System.Random(i);
-
-                if (r.NextDouble() <= 1 - amountRate)
-                    continue;
-
                 var p = worldPositions[i];
 
                 if(colorDataList != null)
