@@ -109,7 +109,7 @@ public static class MeshHelper
 
             int suvdivisionLevel = levels[i];
 
-            if(suvdivisionLevel == 1)
+            if(suvdivisionLevel > 0)
             {
                 var temp_indices_1 = Subdivide(i1, i2, i3);
 

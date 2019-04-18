@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 549309915a5a7414ea2d44472274aa1e
+timeCreated: 1506055018
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - texGen: {fileID: 7200000, guid: e1086686c92011c469c8c17f3068beed, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
