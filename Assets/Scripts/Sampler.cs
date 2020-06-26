@@ -20,7 +20,7 @@ public class Sampler : MonoBehaviour
     int triangle_totalCount;
 
     [SerializeField]
-    int samplingCount;
+    int samplingCount = 7000;
 
     SkinnedMeshRenderer skinRenderer;
     Mesh mesh;
@@ -30,6 +30,12 @@ public class Sampler : MonoBehaviour
     //PointData[] pointDatas;
 
     float[] sizeOfTriangles;
+
+
+    [SerializeField]
+    [Range(0, 10f)]
+    float thresholdDist = 0.03f;
+
 
     // Use this for initialization
     void Start() { }
@@ -321,10 +327,6 @@ public class Sampler : MonoBehaviour
         return worldPositions;
     }
 
-    [SerializeField]
-    [Range(0, 10f)]
-    float thresholdDist;
-
     List<int> GetRemoveIndex(Vector3[] positionDataList)
     {
         List<int> deleteIndies = new List<int>();
@@ -508,8 +510,18 @@ public class Sampler : MonoBehaviour
             var col2 = densityTex.GetPixel((int)(uv2.x * densityTex.width), (int)(uv2.y * densityTex.height));
             var col3 = densityTex.GetPixel((int)(uv3.x * densityTex.width), (int)(uv3.y * densityTex.height));
 
-            Color c = (col1 + col2 + col3) / 3f; //densityTex.GetPixel((int)(barycentricPos.x * densityTex.width), (int)(barycentricPos.y * densityTex.height));
-            density = c.r;
+            Color c = densityTex.GetPixel((int)(barycentricPos.x * densityTex.width), (int)(barycentricPos.y * densityTex.height));
+            if(c.r == 1 || c.g == 1 || c.b == 1)
+            {
+                density = 1;
+            }
+            else
+            {
+                density = 0;// (c.r + c.g + c.b) / 3f;
+            }
+            //Debug.Log("density : " + density);
+
+            //density = density <= 0.3f ? 0 : 1;
         }
 
         return density;

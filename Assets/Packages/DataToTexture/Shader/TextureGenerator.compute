@@ -1,15 +1,23 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 
+struct Data
+{
+	float3 pos;
+	float3 distribution;
+};
+
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float3> output;
-StructuredBuffer<float3> positionBuf;
+StructuredBuffer<Data> dataBuf;
 
 [numthreads(8,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	float3 pos = positionBuf[id.x];
-	output[id.xy] = pos;
+	float3 pos = dataBuf[id.x].pos;
+	float3 distribution = dataBuf[id.x].distribution;
+	output[float2(id.x, 0)] = pos;
+	output[float2(id.x, 1)] = distribution;
 
 }

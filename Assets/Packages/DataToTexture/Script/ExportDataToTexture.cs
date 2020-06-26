@@ -1,22 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class ExportDataToTexture : MonoBehaviour
 {
-    ComputeBuffer positionDataBuf;
-    ComputeBuffer colorDataBuf;
-
     [SerializeField]
     ComputeShader texGen;
 
     string folderPath;
 
-    Vector3[] _positionData;
+    Data[] _data;
+    ComputeBuffer _dataBuffer;
 
-    [SerializeField]
-    string dirPath;
+    public string outputPath;
+
     public string textureName;
 
     void Start() { }
@@ -26,7 +25,7 @@ public class ExportDataToTexture : MonoBehaviour
     [SerializeField]
     bool isShowTexture = true;
 
-    public Rect rec = new Rect(0, 0, 100, 100);
+    Rect rec = new Rect(0, 0, 100, 100);
     Texture2D tex;
     private void OnGUI()
     {
@@ -37,32 +36,52 @@ public class ExportDataToTexture : MonoBehaviour
             Graphics.DrawTexture(rec, tex);
     }
 
-    public void SetTargetData(Vector3[] positionData)
+    public void SetTargetData(Vector3[] positionData, Vector3[] distributionDataList)
     {
-        _positionData = positionData;
+        _data = new Data[positionData.Length];
+
+        for (int i = 0; i < _data.Length; i++)
+        {
+            var d = new Data();
+            d.pos = positionData[i];
+            d.distribution = distributionDataList[i];
+
+            if (d.distribution.x != 0 || d.distribution.y != 0 || d.distribution.z != 0)
+            {
+
+            }
+            else
+            {
+                //Debug.Log("d.distribution : " + d.distribution);
+            }
+            _data[i] = d;
+        }
     }
 
     public void Vector3ToTex()
     {
-        if(_positionData == null || _positionData.Length == 0)
+        if (string.IsNullOrEmpty(outputPath))
+            return;
+
+        if(_data == null || _data.Length == 0)
         {
             Debug.Log("<color=red>target data is empty</color>");
             return;
         }
 
-        if(string.IsNullOrEmpty(dirPath))
+        if(string.IsNullOrEmpty(outputPath))
         {
-            folderPath = dirPath;
+            folderPath = outputPath;
         }
         else
         {
-            folderPath = Path.Combine("Assets", dirPath);
+            folderPath = Path.Combine("Assets", outputPath);
         }
 
-        int texWidth = Mathf.NextPowerOfTwo(_positionData.Length);
-        int texHeight = 1;
+        int texWidth = Mathf.NextPowerOfTwo(_data.Length);
+        int texHeight = 2;
 
-        Debug.Log("positionData.Length : " + _positionData.Length);
+        Debug.Log("positionData.Length : " + _data.Length);
         Debug.Log("texWidth : " + texWidth);
 
         RenderTexture rt = new RenderTexture(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
@@ -76,22 +95,25 @@ public class ExportDataToTexture : MonoBehaviour
         //for (int i = 0; i < _data.Length; i++)
         //{
         //}
-        positionDataBuf = new ComputeBuffer(_positionData.Length, System.Runtime.InteropServices.Marshal.SizeOf(typeof(Vector3)));
-        positionDataBuf.SetData(_positionData);
-
+        _dataBuffer = new ComputeBuffer(_data.Length, Marshal.SizeOf(typeof(Data)));
+        //positionDataBuf.SetData(_positionData);
+        _dataBuffer.SetData(_data);
         texGen.SetTexture(0, "output", rt);
-        texGen.SetBuffer(0, "positionBuf", positionDataBuf);
+        //texGen.SetBuffer(0, "positionBuf", positionDataBuf);
+        texGen.SetBuffer(0, "dataBuf", _dataBuffer);
 
-        texGen.Dispatch(0, _positionData.Length / 8 + 1, 1, 1);
+        //texGen.Dispatch(0, _positionData.Length / 8 + 1, 1, 1);
+        texGen.Dispatch(0, _data.Length / 8 + 1, 1, 1);
 
         tex = RenderTextureToTexture2D.Convert(rt);
 
-        var pixels = tex.GetPixels();
-        //for (int i = 0; i < pixels.Length; i++)
-        //{
-        //    Debug.Log("<color=green>" + pixels[i] + "</color>");
-        //    Debug.Log("<color=red>" + _data[i] + "</color>");
-        //}
+        for (int i = 0; i < tex.width; i++)
+        {
+            var pos = tex.GetPixel(i, 0);
+            var distrubution = tex.GetPixel(i, 1);
+            //Debug.Log("<color=green>" + pos + "</color>");
+            //Debug.Log("<color=red>" + distrubution + "</color>");
+        }
 
         string fileName = rt.name + ".asset";
         string assetFilePath = Path.Combine("Assets/", fileName);
@@ -110,13 +132,18 @@ public class ExportDataToTexture : MonoBehaviour
         if (rt != null)
             rt.Release();
 
-        if(positionDataBuf != null)
-            positionDataBuf.Release();
-
-        if (colorDataBuf != null)
-            colorDataBuf.Release();
+        if (_dataBuffer != null)
+            _dataBuffer.Release();
 
         Debug.Log("<color=green>bake completed</color>");
+    }
+
+    private void OnDestroy()
+    {
+        if(_dataBuffer != null)
+        {
+            _dataBuffer.Release();
+        }
     }
 
     //void Read()
@@ -130,4 +157,10 @@ public class ExportDataToTexture : MonoBehaviour
     //        Debug.Log(dataList[i]);
     //    }
     //}
+}
+
+public struct Data
+{
+    public Vector3 pos;
+    public Vector3 distribution;
 }
