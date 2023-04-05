@@ -36,25 +36,24 @@ public class ExportDataToTexture : MonoBehaviour
             Graphics.DrawTexture(rec, tex);
     }
 
-    public void SetTargetData(Vector3[] positionData, Vector3[] distributionDataList)
+    public void SetTargetData(Vector3[] pointDataList, Vector3[] distributionDataList)
     {
-        _data = new Data[positionData.Length];
+        _data = new Data[pointDataList.Length];
 
         for (int i = 0; i < _data.Length; i++)
         {
             var d = new Data();
-            d.pos = positionData[i];
+            d.point = pointDataList[i];
             d.distribution = distributionDataList[i];
 
-            if (d.distribution.x != 0 || d.distribution.y != 0 || d.distribution.z != 0)
+            if (d.distribution != Vector3.zero)
             {
-
+                _data[i] = d;
             }
             else
             {
                 //Debug.Log("d.distribution : " + d.distribution);
             }
-            _data[i] = d;
         }
     }
 
@@ -161,6 +160,6 @@ public class ExportDataToTexture : MonoBehaviour
 
 public struct Data
 {
-    public Vector3 pos;
+    public Vector3 point;
     public Vector3 distribution;
 }

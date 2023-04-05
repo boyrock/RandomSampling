@@ -20,7 +20,7 @@ public class Sampler : MonoBehaviour
     int triangle_totalCount;
 
     [SerializeField]
-    int samplingCount = 7000;
+    public int samplingCount = 7000;
 
     SkinnedMeshRenderer skinRenderer;
     Mesh mesh;
@@ -34,7 +34,7 @@ public class Sampler : MonoBehaviour
 
     [SerializeField]
     [Range(0, 10f)]
-    float thresholdDist = 0.03f;
+    public float thresholdDist = 0.03f;
 
 
     // Use this for initialization
@@ -235,7 +235,7 @@ public class Sampler : MonoBehaviour
 
     private IEnumerator ChoiceRandomPoint(UnityAction<PointData[]> callback)
     {
-        Debug.Log("ChoiceRandomPoint!");
+        //Debug.Log("ChoiceRandomPoint!");
 
         var pointDatas = new PointData[samplingCount];
 
@@ -267,7 +267,7 @@ public class Sampler : MonoBehaviour
     }
     private PointData[] ChoiceRandomPoint()
     {
-        Debug.Log("ChoiceRandomPoint!");
+        //Debug.Log("ChoiceRandomPoint!");
 
         var pointDatas = new List<PointData>();
 

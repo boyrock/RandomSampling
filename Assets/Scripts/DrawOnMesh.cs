@@ -17,8 +17,41 @@ public class DrawOnMesh : MonoBehaviour
 
     Sampler sampler;
     Mesh mesh;
+    Renderer _renderer;
 
-    SkinnedMeshRenderer skinRenderer;
+    Renderer renderer
+    {
+        get
+        {
+            if(_renderer == null)
+            {
+                if(skinRenderer != null)
+                {
+                    _renderer = skinRenderer;
+                }
+                else
+                {
+                    _renderer = this.GetComponentInChildren<Renderer>();
+                }
+            }
+
+            return _renderer;
+        }
+    }
+    SkinnedMeshRenderer _skinRenderer;
+    SkinnedMeshRenderer skinRenderer
+    {
+        get
+        {
+            if(_skinRenderer == null)
+            {
+                _skinRenderer = this.GetComponentInChildren<SkinnedMeshRenderer>();
+            }
+
+            return _skinRenderer;
+        }
+    }
+
     MeshFilter mf;
     float scale = 1;
 
@@ -32,24 +65,26 @@ public class DrawOnMesh : MonoBehaviour
 
     Vector3[] worldPositions;
     Vector3[] distributionDataList;
+    Vector3[] pointDataList;
+
+    [SerializeField]
+    bool playOnStartup = false;
 
     private void Awake()
     {
-        skinRenderer = this.GetComponentInChildren<SkinnedMeshRenderer>();
+        if (playOnStartup)
+            Begin();
     }
 
     public void SetDistributionTexture(Texture2D tex)
     {
         distributionTex = tex;
-        skinRenderer.material.SetTexture("_MainTex", tex);
+        renderer.material.SetTexture("_MainTex", tex);
     }
 
     // Use this for initialization
     public void Begin()
     {
-        if (distributionTex == null)
-            return;
-
         sampler = this.GetComponent<Sampler>();
         mf = this.GetComponent<MeshFilter>();
         dataExporter = this.GetComponent<ExportDataToTexture>();
@@ -68,15 +103,15 @@ public class DrawOnMesh : MonoBehaviour
         {
             this.points = sampler.Sampling();
 
-            Vector3[] positionDataList = new Vector3[this.points.Length];
+            pointDataList = new Vector3[this.points.Length];
 
-            distributionDataList = new Vector3[positionDataList.Length];
-            worldPositions = new Vector3[positionDataList.Length];
+            distributionDataList = new Vector3[pointDataList.Length];
+            worldPositions = new Vector3[pointDataList.Length];
 
-            for (int i = 0; i < positionDataList.Length; i++)
+            for (int i = 0; i < pointDataList.Length; i++)
             {
                 var p = points[i];
-                positionDataList[i] = new Vector3(p.index, p.x, p.y);
+                pointDataList[i] = new Vector3(p.index, p.x, p.y);
                 worldPositions[i] = GetWorldPosition(p.x, p.y, p.index);
 
                 if(distributionTex != null)
@@ -87,7 +122,7 @@ public class DrawOnMesh : MonoBehaviour
                 }
             }
 
-            dataExporter.SetTargetData(positionDataList, distributionDataList);
+            dataExporter.SetTargetData(pointDataList, distributionDataList);
         }
         else
         {
@@ -95,7 +130,7 @@ public class DrawOnMesh : MonoBehaviour
             distributionDataList = new Vector3[length];
             worldPositions = new Vector3[length];
 
-            var pixels = dataTex.GetPixels();
+            //var pixels = dataTex.GetPixels();
             for (int i = 0; i < length; i++)
             {
                 var p = dataTex.GetPixel(i, 0);
@@ -179,13 +214,13 @@ public class DrawOnMesh : MonoBehaviour
             for (int i = 0; i < worldPositions.Length; i++)
             {
                 var p = worldPositions[i];
-                if(distributionDataList != null)
+                if (distributionDataList != null)
                 {
                     var col = distributionDataList[i];
                     if (col == Vector3.zero)
                         continue;
 
-                        Gizmos.color = new Color(col.x, col.y, col.z);
+                    Gizmos.color = new Color(col.x, col.y, col.z);
                 }
 
                 Gizmos.DrawSphere(p, gizumoSphereSize);
